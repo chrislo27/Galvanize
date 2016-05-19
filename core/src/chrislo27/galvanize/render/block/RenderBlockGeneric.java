@@ -31,7 +31,7 @@ public class RenderBlockGeneric extends BlockRenderer {
 
 	@Override
 	public void render(Batch batch, World world, int x, int y) {
-		AtlasRegion region = Blocks.getRegion(getCurrentRegion(x, y));
+		AtlasRegion region = Blocks.getRegion(textures.get(getCurrentRegion(x, y)));
 
 		drawRegion(batch, region, x, y);
 	}
