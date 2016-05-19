@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator.FreeTypeFont
 import com.badlogic.gdx.utils.Array;
 
 import chrislo27.galvanize.init.DefAssetLoader;
+import chrislo27.galvanize.screen.AssetLoadingScreen;
+import chrislo27.galvanize.screen.WorldScreen;
 import ionium.registry.AssetRegistry;
 import ionium.registry.ScreenRegistry;
 import ionium.util.Logger;
@@ -35,7 +37,7 @@ public class Main extends ionium.templates.Main {
 
 	@Override
 	public Screen getScreenToSwitchToAfterLoadingAssets() {
-		return ScreenRegistry.get("mainMenu");
+		return new WorldScreen(this);
 	}
 
 	@Override
@@ -67,6 +69,7 @@ public class Main extends ionium.templates.Main {
 
 		ScreenRegistry reg = ScreenRegistry.instance();
 
+		reg.add("assetloading", new AssetLoadingScreen(this));
 	}
 
 	@Override
