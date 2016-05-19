@@ -13,20 +13,8 @@ import ionium.util.MathHelper;
 
 public class RenderBlockGeneric extends BlockRenderer {
 
-	private Array<String> textures = new Array<>();
-	public float animationTime = 1;
-	public boolean fitInBlockSize = true;
-
-	/**
-	 * This amount will be multiplied by the position and added to the "time" value of the animation.
-	 * Useful if you want a sweeping effect.
-	 */
-	public Vector2 timeOffset = new Vector2(0, 0);
-
 	public RenderBlockGeneric(float animationTime, boolean fitInBlockSize, String... textures) {
-		this.textures.addAll(textures);
-		this.animationTime = animationTime;
-		this.fitInBlockSize = fitInBlockSize;
+		super(animationTime, fitInBlockSize, textures);
 	}
 
 	public RenderBlockGeneric(boolean fitInBlockSize, String texture) {
@@ -46,19 +34,6 @@ public class RenderBlockGeneric extends BlockRenderer {
 		AtlasRegion region = Blocks.getRegion(getCurrentRegion(x, y));
 
 		drawRegion(batch, region, x, y);
-	}
-
-	protected void drawRegion(Batch batch, AtlasRegion region, int x, int y) {
-		batch.draw(region, x, y, fitInBlockSize ? 1 : region.getRegionWidth() / Block.TILE_SIZE,
-				fitInBlockSize ? 1 : region.getRegionHeight() / Block.TILE_SIZE);
-	}
-
-	protected String getCurrentRegion(int x, int y) {
-		if (textures.size == 1) return textures.first();
-
-		float percent = MathHelper.getSawtoothWave(System.currentTimeMillis(), animationTime);
-
-		return textures.get(MathUtils.clamp((int) (percent * textures.size), 0, textures.size - 1));
 	}
 
 }
