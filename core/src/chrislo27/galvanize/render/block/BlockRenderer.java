@@ -12,7 +12,7 @@ import ionium.util.MathHelper;
 
 public abstract class BlockRenderer {
 
-	private Array<String> textures = new Array<>();
+	protected Array<String> textures = new Array<>();
 	public float animationTime = 1;
 	public boolean fitInBlockSize = true;
 
@@ -45,12 +45,13 @@ public abstract class BlockRenderer {
 				fitInBlockSize ? 1 : region.getRegionHeight() / Block.TILE_SIZE);
 	}
 
-	protected String getCurrentRegion(int x, int y) {
-		if (textures.size == 1) return textures.first();
+	protected int getCurrentRegion(int x, int y) {
+		if (textures.size == 1) return 0;
 
-		float percent = MathHelper.getSawtoothWave(System.currentTimeMillis(), animationTime);
+		float percent = MathHelper.getSawtoothWave((long) (System.currentTimeMillis()
+				+ (timeOffset.x * y * 1000) + (timeOffset.y * y * 1000)), animationTime);
 
-		return textures.get(MathUtils.clamp((int) (percent * textures.size), 0, textures.size - 1));
+		return MathUtils.clamp((int) (percent * textures.size), 0, textures.size - 1);
 	}
 
 	public abstract void render(Batch batch, World world, int x, int y);
