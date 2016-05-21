@@ -70,8 +70,15 @@ public class SaveFile {
 		FileOutputStream outputStream = new FileOutputStream(handle.file().getAbsolutePath());
 		GZIPOutputStream gzipStream = new GZIPOutputStream(outputStream);
 
-		nbtStream.write(writeToNBT());
-		gzipStream.write(baos.toByteArray());
+		try {
+			nbtStream.write(writeToNBT());
+			gzipStream.write(baos.toByteArray());
+		} catch (IOException e) {
+			nbtStream.close();
+			gzipStream.close();
+
+			throw e;
+		}
 
 		nbtStream.close();
 		gzipStream.close();
@@ -85,7 +92,13 @@ public class SaveFile {
 		ByteArrayInputStream byteStream = new ByteArrayInputStream(loadBytes(handle));
 		NbtInputStream nbtStream = new NbtInputStream(byteStream);
 
-		readFromNBT((TagCompound) nbtStream.readTag());
+		try {
+			readFromNBT((TagCompound) nbtStream.readTag());
+		} catch (IOException e) {
+			nbtStream.close();
+
+			throw e;
+		}
 
 		nbtStream.close();
 	}
