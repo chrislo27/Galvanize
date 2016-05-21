@@ -82,11 +82,24 @@ public class World {
 	}
 
 	public EntityPlayer getPlayer() {
-		if (thePlayer == null) {
+		return thePlayer;
+	}
 
+	public void clearAllEntities() {
+		entities.clear();
+		entityRetrievalArray.clear();
+		quadtree.clear();
+		thePlayer = null;
+	}
+
+	public boolean doesWorldContain(Block block) {
+		for (int x = 0; x < worldWidth; x++) {
+			for (int y = 0; y < worldHeight; y++) {
+				if (getBlock(x, y) == block) return true;
+			}
 		}
 
-		return thePlayer;
+		return false;
 	}
 
 	public Array<Entity> getNearbyCollidableEntities(Entity e) {
