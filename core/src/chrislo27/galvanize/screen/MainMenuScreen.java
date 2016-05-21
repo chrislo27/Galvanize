@@ -30,6 +30,7 @@ public class MainMenuScreen extends Updateable<Main> {
 	private Group mainMenuGroup;
 	private TextButton newGameButton;
 	private TextButton continueGameButton;
+	private TextButton levelEditorButton;
 
 	private Group confirmNewGameGroup;
 	private ImageButton confirmYes;
@@ -86,6 +87,8 @@ public class MainMenuScreen extends Updateable<Main> {
 					if (SaveFile.instance().saveLocation.exists()) {
 						try {
 							SaveFile.instance().load(SaveFile.instance().saveLocation);
+
+							transitionToLevelSelect();
 						} catch (IOException e) {
 							e.printStackTrace();
 							setEnabled(false);
@@ -103,12 +106,29 @@ public class MainMenuScreen extends Updateable<Main> {
 				}
 			};
 
-			continueGameButton.align(Align.center | Align.bottom).setEnabled(false)
-					.setPixelOffsetSize(256, 48).setScreenOffset(0, 0.25f);
+			continueGameButton.align(Align.center | Align.bottom).setPixelOffsetSize(256, 48)
+					.setScreenOffset(0, 0.25f);
 
 			continueGameButton.setPixelOffset(0, 64);
 
 			mainMenuGroup.addActor(continueGameButton);
+
+			levelEditorButton = new TextButton(stage, palette, "mainMenu.levelEditor") {
+
+				@Override
+				public void onClickAction(float x, float y) {
+					super.onClickAction(x, y);
+
+				}
+
+			};
+
+			levelEditorButton.align(Align.center | Align.bottom).setPixelOffsetSize(256, 48)
+					.setScreenOffset(0, 0.25f);
+
+			levelEditorButton.setPixelOffset(0, -64);
+
+			mainMenuGroup.addActor(levelEditorButton);
 		}
 
 		stage.addActor(mainMenuGroup);
@@ -220,7 +240,7 @@ public class MainMenuScreen extends Updateable<Main> {
 	private void transitionToLevelSelect() {
 		try {
 			SaveFile.instance().load(SaveFile.instance().saveLocation);
-			main.transition(new GearZoom(0.5f), null, ScreenRegistry.get("levelSelect"));
+			main.transition(new GearZoom(0.75f), null, ScreenRegistry.get("levelSelect"));
 		} catch (IOException e) {
 			e.printStackTrace();
 
@@ -255,6 +275,8 @@ public class MainMenuScreen extends Updateable<Main> {
 	@Override
 	public void show() {
 		if (stage == null) generateStage();
+
+		continueGameButton.setEnabled(true);
 
 		stage.onResize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
