@@ -26,6 +26,7 @@ public class WorldScreen extends Updateable<Main> {
 
 	@Override
 	public void renderUpdate() {
+		world.inputUpdate();
 	}
 
 	@Override

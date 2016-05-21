@@ -48,6 +48,10 @@ public class World {
 		collisionResolver = new CollisionResolver(1f / GlobalVariables.ticks, 1f / Block.TILE_SIZE);
 	}
 
+	public void inputUpdate() {
+
+	}
+
 	public void tickUpdate() {
 		TickBenchmark.instance().start("collision");
 		quadtree.clear();
