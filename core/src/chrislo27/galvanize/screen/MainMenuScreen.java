@@ -36,6 +36,10 @@ public class MainMenuScreen extends Updateable<Main> {
 	private ImageButton confirmNo;
 	private TextLabel confirmLabel;
 
+	private Group loadFailedGroup;
+	private TextLabel loadFailedLabel;
+	private TextButton returnToMainMenu;
+
 	public MainMenuScreen(Main m) {
 		super(m);
 	}
@@ -59,8 +63,8 @@ public class MainMenuScreen extends Updateable<Main> {
 
 						@Override
 						public void run() {
-							mainMenuGroup.setScreenOffset(0, -1);
-							confirmNewGameGroup.setScreenOffset(0, 0);
+							stage.setAllVisible(false);
+							confirmNewGameGroup.setVisible(true);
 						}
 
 					});
@@ -79,6 +83,16 @@ public class MainMenuScreen extends Updateable<Main> {
 				public void onClickAction(float x, float y) {
 					super.onClickAction(x, y);
 
+					if (SaveFile.instance().saveLocation.exists()) {
+						try {
+							SaveFile.instance().load(SaveFile.instance().saveLocation);
+						} catch (IOException e) {
+							e.printStackTrace();
+							setEnabled(false);
+						}
+					} else {
+						setEnabled(false);
+					}
 				}
 
 				@Override
@@ -145,8 +159,8 @@ public class MainMenuScreen extends Updateable<Main> {
 
 						@Override
 						public void run() {
-							mainMenuGroup.setScreenOffset(0, 0);
-							confirmNewGameGroup.setScreenOffset(0, -1);
+							stage.setAllVisible(false);
+							mainMenuGroup.setVisible(true);
 						}
 
 					});
@@ -163,12 +177,44 @@ public class MainMenuScreen extends Updateable<Main> {
 
 			confirmLabel.getColor().set(1, 1, 1, 1);
 			confirmLabel.setTextAlign(Align.center).setTextWrap(true).align(Align.center)
-					.setScreenOffset(0, 0.1f, 0.9f, 1);
+					.setScreenOffset(0, 0.1f, 0.75f, 1);
 
 			g.addActor(confirmLabel);
 		}
 
-		stage.addActor(confirmNewGameGroup).setScreenOffset(0, -1);
+		stage.addActor(confirmNewGameGroup).setVisible(false);
+
+		// load failed
+
+		loadFailedGroup = new Group(stage);
+
+		{
+			loadFailedLabel = new TextLabel(stage, palette, "mainMenu.loadFailed");
+
+			loadFailedLabel.getColor().set(1, 1, 1, 1);
+			loadFailedLabel.setTextAlign(Align.center).setTextWrap(true).align(Align.center)
+					.setScreenOffset(0, 0.1f, 0.75f, 1);
+
+			loadFailedGroup.addActor(loadFailedLabel);
+
+			returnToMainMenu = new TextButton(stage, palette, "mainMenu.backToMainMenu") {
+
+				@Override
+				public void onClickAction(float x, float y) {
+					super.onClickAction(x, y);
+
+					stage.setAllVisible(false);
+					mainMenuGroup.setVisible(true);
+				}
+			};
+
+			returnToMainMenu.align(Align.center).setPixelOffsetSize(256, 48).setScreenOffset(0,
+					-0.1f);
+
+			loadFailedGroup.addActor(returnToMainMenu);
+		}
+
+		stage.addActor(loadFailedGroup).setVisible(false);
 	}
 
 	private void transitionToLevelSelect() {
@@ -177,6 +223,9 @@ public class MainMenuScreen extends Updateable<Main> {
 			main.transition(new GearZoom(0.5f), null, ScreenRegistry.get("levelSelect"));
 		} catch (IOException e) {
 			e.printStackTrace();
+
+			stage.setAllVisible(false);
+			loadFailedGroup.setVisible(true);
 		}
 
 	}
