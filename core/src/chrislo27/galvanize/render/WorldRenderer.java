@@ -60,14 +60,16 @@ public class WorldRenderer implements Disposable {
 		batch.setProjectionMatrix(camera.combined);
 
 		int minX = (int) MathUtils.clamp(
-				camera.position.x - camera.viewportWidth * 0.5f - extraMargin, 0, world.worldWidth);
+				camera.position.x - camera.viewportWidth * 0.5f / camera.zoom - extraMargin, 0,
+				world.worldWidth);
 		int minY = (int) MathUtils.clamp(
-				camera.position.y - camera.viewportHeight * 0.5f - extraMargin, 0,
+				camera.position.y - camera.viewportHeight * 0.5f / camera.zoom - extraMargin, 0,
 				world.worldHeight);
 		int maxX = (int) MathUtils.clamp(
-				camera.position.x + camera.viewportWidth * 0.5f + extraMargin, 0, world.worldWidth);
+				camera.position.x + camera.viewportWidth * 0.5f / camera.zoom + extraMargin, 0,
+				world.worldWidth);
 		int maxY = (int) MathUtils.clamp(
-				camera.position.y + camera.viewportHeight * 0.5f + extraMargin, 0,
+				camera.position.y + camera.viewportHeight * 0.5f / camera.zoom + extraMargin, 0,
 				world.worldHeight);
 
 		renderWorldToBuffer(batch, world, minX, minY, maxX, maxY);
