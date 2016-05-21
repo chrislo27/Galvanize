@@ -169,6 +169,7 @@ public abstract class Entity implements QuadRectangleable {
 			Entity e = nearby.get(i);
 
 			if (e == this) continue;
+			if (!canThisCollideInto(e) || !e.canOtherCollideWith(this)) continue;
 
 			if (MathUtils.isEqual(e.physicsBody.bounds.y + e.physicsBody.bounds.height,
 					this.physicsBody.bounds.y, world.collisionResolver.tolerance)) {
