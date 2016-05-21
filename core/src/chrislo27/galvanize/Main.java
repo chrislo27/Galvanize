@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Array;
 
 import chrislo27.galvanize.init.DefAssetLoader;
 import chrislo27.galvanize.screen.AssetLoadingScreen;
+import chrislo27.galvanize.screen.MainMenuScreen;
 import chrislo27.galvanize.screen.WorldScreen;
 import ionium.registry.AssetRegistry;
 import ionium.registry.ScreenRegistry;
@@ -37,7 +38,7 @@ public class Main extends ionium.templates.Main {
 
 	@Override
 	public Screen getScreenToSwitchToAfterLoadingAssets() {
-		return new WorldScreen(this);
+		return ScreenRegistry.get("mainMenu");
 	}
 
 	@Override
@@ -70,6 +71,7 @@ public class Main extends ionium.templates.Main {
 		ScreenRegistry reg = ScreenRegistry.instance();
 
 		reg.add("assetloading", new AssetLoadingScreen(this));
+		reg.add("mainMenu", new MainMenuScreen(this));
 	}
 
 	@Override

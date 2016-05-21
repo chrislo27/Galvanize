@@ -14,6 +14,9 @@ public class DefAssetLoader implements IAssetLoader {
 
 	@Override
 	public void addManagedAssets(AssetManager manager) {
+		manager.load(AssetMap.add("ui_yes", "images/ui/yes.png"), Texture.class);
+		manager.load(AssetMap.add("ui_no", "images/ui/no.png"), Texture.class);
+
 		manager.load(AssetMap.add("entity_player", "images/entity/player/player.pack"),
 				TextureAtlas.class);
 	}
