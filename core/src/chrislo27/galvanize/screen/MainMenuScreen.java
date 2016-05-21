@@ -119,6 +119,10 @@ public class MainMenuScreen extends Updateable<Main> {
 				public void onClickAction(float x, float y) {
 					super.onClickAction(x, y);
 
+					LevelEditorScreen le = ScreenRegistry.get("levelEditor",
+							LevelEditorScreen.class);
+
+					main.setScreen(le);
 				}
 
 			};

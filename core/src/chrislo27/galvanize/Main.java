@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Array;
 
 import chrislo27.galvanize.init.DefAssetLoader;
 import chrislo27.galvanize.screen.AssetLoadingScreen;
+import chrislo27.galvanize.screen.LevelEditorScreen;
 import chrislo27.galvanize.screen.MainMenuScreen;
 import chrislo27.galvanize.screen.WorldScreen;
 import ionium.registry.AssetRegistry;
@@ -72,6 +73,7 @@ public class Main extends ionium.templates.Main {
 
 		reg.add("assetloading", new AssetLoadingScreen(this));
 		reg.add("mainMenu", new MainMenuScreen(this));
+		reg.add("levelEditor", new LevelEditorScreen(this));
 	}
 
 	@Override
