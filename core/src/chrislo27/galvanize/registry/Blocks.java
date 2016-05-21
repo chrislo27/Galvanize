@@ -1,13 +1,12 @@
 package chrislo27.galvanize.registry;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 
 import chrislo27.galvanize.block.Block;
-import chrislo27.galvanize.render.block.RenderBlockGeneric;
+import chrislo27.galvanize.block.BlockGreyWall;
 import ionium.util.render.TextureRegionDebleeder;
 
 public class Blocks {
@@ -35,18 +34,7 @@ public class Blocks {
 	private ObjectMap<String, AtlasRegion> regions = new ObjectMap<>();
 
 	private void loadResources() {
-		addBlock("test", new Block() {
-
-			{
-				this.renderBlock = new RenderBlockGeneric("test");
-			}
-
-			@Override
-			public void getRequiredTextures(ObjectMap<String, Texture> map) {
-				map.put("test", new Texture("images/gear.png"));
-			}
-
-		});
+		addBlock("greywall", new BlockGreyWall());
 	}
 
 	public void setAtlas(TextureAtlas a) {
