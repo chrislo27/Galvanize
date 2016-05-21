@@ -30,7 +30,7 @@ public class WorldRenderer implements Disposable {
 
 	public WorldRenderer() {
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, 40, 22.5f);
+		camera.setToOrtho(false, 20, 11.25f);
 
 		createBuffers();
 	}
