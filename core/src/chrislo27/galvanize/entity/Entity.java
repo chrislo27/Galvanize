@@ -16,8 +16,6 @@ import ionium.util.Coordinate;
 import ionium.util.MathHelper;
 import ionium.util.quadtree.QuadRectangleable;
 
-
-
 public abstract class Entity implements QuadRectangleable {
 
 	protected static final Array<Coordinate> tempCoordArray = new Array<>();
@@ -106,6 +104,7 @@ public abstract class Entity implements QuadRectangleable {
 
 			if (e == this) continue;
 			if (!e.physicsBody.bounds.overlaps(pathBounds)) continue;
+			if (!canThisCollideInto(e) || !e.canOtherCollideWith(this)) continue;
 
 			bodies.add(e.physicsBody);
 		}
@@ -136,6 +135,26 @@ public abstract class Entity implements QuadRectangleable {
 		world.collisionResolver.freeResult(collisionResult);
 		world.physicsBodyPool.freeAll(tempBodyArray);
 		tempBodyArray.clear();
+	}
+
+	/**
+	 * If this entity can collide into the other one. Do not confuse with
+	 * canOtherCollideWith.
+	 * @param e
+	 * @return
+	 */
+	public boolean canThisCollideInto(Entity e) {
+		return true;
+	}
+
+	/**
+	 * If the other entity can collide into this one. Do not confuse with
+	 * canThisCollideInto.
+	 * @param e
+	 * @return
+	 */
+	public boolean canOtherCollideWith(Entity e) {
+		return true;
 	}
 
 	public float getAverageFriction(Array<Entity> nearby) {
