@@ -80,6 +80,8 @@ public class SaveFile {
 	public void load(FileHandle handle) throws IOException {
 		if (handle.isDirectory()) throw new IllegalArgumentException("File cannot be a directory!");
 
+		if (!handle.exists()) return;
+
 		ByteArrayInputStream byteStream = new ByteArrayInputStream(loadBytes(handle));
 		NbtInputStream nbtStream = new NbtInputStream(byteStream);
 
