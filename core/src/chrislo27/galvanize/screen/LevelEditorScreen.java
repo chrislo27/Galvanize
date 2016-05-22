@@ -226,6 +226,23 @@ public class LevelEditorScreen extends Updateable<Main> {
 				}
 			}
 
+			private boolean wasMouseOnMe = false;
+
+			@Override
+			public void onMouseMove(float x, float y) {
+				super.onMouseMove(x, y);
+
+				if (x < 0 || y < 0 || x >= 1 || y > 1) {
+					if (wasMouseOnMe) infoText.setLocalizationKey(null);
+
+					wasMouseOnMe = false;
+				} else {
+					if (!wasMouseOnMe) infoText.setLocalizationKey("levelEditor.infoText.hideMenu");
+
+					wasMouseOnMe = true;
+				}
+			}
+
 		};
 		toggleTaskbar.align(Align.bottomRight).setPixelOffset(0, 128, 128, 32);
 		toggleTaskbar.getColor().set(0.25f, 0.25f, 0.25f, 1);
