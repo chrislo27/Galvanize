@@ -59,7 +59,7 @@ public class World {
 				Block b = getBlock(x, y);
 
 				if (b != null) {
-					b.tickUpdate();
+					b.tickUpdate(this, x, y);
 				}
 			}
 		}

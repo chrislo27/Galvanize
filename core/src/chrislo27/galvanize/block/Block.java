@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.ObjectMap;
 
 import chrislo27.galvanize.render.block.BlockRenderer;
+import chrislo27.galvanize.world.World;
 import ionium.aabbcollision.PhysicsBody;
 
 public abstract class Block {
@@ -19,7 +20,7 @@ public abstract class Block {
 
 	}
 
-	public void tickUpdate() {
+	public void tickUpdate(World world, int x, int y) {
 
 	}
 
