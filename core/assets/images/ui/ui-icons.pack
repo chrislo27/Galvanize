@@ -3,58 +3,72 @@ ui-icons.png
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-camera
+arrow_down
   rotate: false
   xy: 1, 261
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-gear
+arrow_up
   rotate: false
   xy: 1, 131
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-moviecamera
+camera
   rotate: false
   xy: 131, 261
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-no
+gear
   rotate: false
   xy: 1, 1
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-pause
+moviecamera
   rotate: false
   xy: 131, 131
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-play
+no
   rotate: false
   xy: 261, 261
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-stop
+pause
   rotate: false
   xy: 131, 1
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
   index: -1
-yes
+play
   rotate: false
   xy: 261, 131
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+stop
+  rotate: false
+  xy: 391, 261
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+yes
+  rotate: false
+  xy: 261, 1
   size: 128, 128
   orig: 128, 128
   offset: 0, 0
