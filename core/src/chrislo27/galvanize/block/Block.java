@@ -19,6 +19,10 @@ public abstract class Block {
 
 	}
 
+	public void tickUpdate() {
+
+	}
+
 	public BlockRenderer getRenderBlock() {
 		return renderBlock;
 	}

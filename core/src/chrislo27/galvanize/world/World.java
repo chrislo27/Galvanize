@@ -53,6 +53,18 @@ public class World {
 	}
 
 	public void tickUpdate() {
+		TickBenchmark.instance().start("blockUpdate");
+		for (int x = 0; x < worldWidth; x++) {
+			for (int y = 0; y < worldHeight; y++) {
+				Block b = getBlock(x, y);
+
+				if (b != null) {
+					b.tickUpdate();
+				}
+			}
+		}
+		TickBenchmark.instance().stop("blockUpdate");
+
 		TickBenchmark.instance().start("collision");
 		quadtree.clear();
 		for (int i = 0; i < entities.size; i++) {
