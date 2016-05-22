@@ -501,7 +501,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 				};
 
 				t.setDaemon(true);
-				t.setName("Open Level");
+				t.setName("Open Level Dialog");
 				t.start();
 			}
 
@@ -581,7 +581,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 				};
 
 				t.setDaemon(true);
-				t.setName("Save Level");
+				t.setName("Save Level Dialog");
 				t.start();
 			}
 
