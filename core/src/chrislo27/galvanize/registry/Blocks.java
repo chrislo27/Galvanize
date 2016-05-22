@@ -34,7 +34,7 @@ public class Blocks {
 	private ObjectMap<String, AtlasRegion> regions = new ObjectMap<>();
 
 	private void loadResources() {
-		addBlock("greywall", new BlockGreyWall());
+		addBlock("greyWall", new BlockGreyWall());
 	}
 
 	public void setAtlas(TextureAtlas a) {
