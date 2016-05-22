@@ -1,7 +1,13 @@
 package chrislo27.galvanize.screen;
 
+import java.io.File;
+
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -12,6 +18,7 @@ import chrislo27.galvanize.Main;
 import chrislo27.galvanize.registry.Blocks;
 import chrislo27.galvanize.render.WorldRenderer;
 import chrislo27.galvanize.world.World;
+import chrislo27.galvanize.world.WorldIO;
 import ionium.registry.AssetRegistry;
 import ionium.screen.Updateable;
 import ionium.stage.Actor;
@@ -22,6 +29,7 @@ import ionium.stage.ui.LocalizationStrategy;
 import ionium.stage.ui.TextLabel;
 import ionium.stage.ui.skin.Palette;
 import ionium.stage.ui.skin.Palettes;
+import ionium.util.IOUtils;
 import ionium.util.i18n.Localization;
 
 public class LevelEditorScreen extends Updateable<Main> {
@@ -36,9 +44,17 @@ public class LevelEditorScreen extends Updateable<Main> {
 	ImageButton pauseButton;
 	ImageButton stopButton;
 	TextLabel infoText;
+	TextLabel saveLocationText;
+	ImageButton cameraChange;
+	ImageButton newLevel;
+	ImageButton openLevel;
+	ImageButton saveLevel;
 
 	boolean isTesting = false;
 	boolean paused = false;
+	boolean isUsingPlayerCam = true;
+
+	File lastSaveLocation = null;
 
 	public LevelEditorScreen(Main m) {
 		super(m);
@@ -48,6 +64,9 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 	public void setWorld(World world) {
 		this.world = world;
+		lastSaveLocation = null;
+		setTesting(false);
+		saveLevel.setEnabled(world != null);
 	}
 
 	public void setTesting(boolean test) {
@@ -56,13 +75,15 @@ public class LevelEditorScreen extends Updateable<Main> {
 		isTesting = test;
 		setPaused(false);
 
-		if (test) {
+		if (isTesting) {
 			stopButton.setEnabled(true);
+			cameraChange.setEnabled(true);
 		} else {
 			if (world != null) world.clearAllEntities();
 			stopButton.setEnabled(false);
 			pauseButton.setEnabled(false);
 			playButton.setEnabled(true);
+			cameraChange.setEnabled(false);
 		}
 	}
 
@@ -186,6 +207,23 @@ public class LevelEditorScreen extends Updateable<Main> {
 				-8, 0);
 
 		group.addActor(infoText);
+
+		saveLocationText = new TextLabel(stage, infoText.getPalette(), null);
+		saveLocationText.setI10NStrategy(new LocalizationStrategy() {
+
+			@Override
+			public String get(String key, Object... params) {
+				if (key == null) return "";
+
+				return key;
+			}
+		});
+		saveLocationText.setTextAlign(Align.left | Align.bottom);
+		saveLocationText.getColor().set(0, 0, 0, 1);
+		saveLocationText.align(Align.left | Align.bottom).setScreenOffset(0, 0, 1, 1)
+				.setPixelOffset(16, 48, -8, 0);
+
+		group.addActor(saveLocationText);
 
 		toggleTaskbar = new ImageButton(stage, p,
 				AssetRegistry.getAtlasRegion("ionium_ui-icons", "arrow_down")) {
@@ -340,6 +378,235 @@ public class LevelEditorScreen extends Updateable<Main> {
 		stopButton.align(Align.right | Align.top).setScreenOffset(0, 0, 0, 0).setPixelOffset(4, 36,
 				32, 32);
 		group.addActor(stopButton);
+
+		cameraChange = new ImageButton(stage, p,
+				AssetRegistry.getAtlasRegion("ionium_ui-icons", "moviecamera")) {
+
+			@Override
+			public void onClickAction(float x, float y) {
+				super.onClickAction(x, y);
+			}
+
+			private boolean wasMouseOnMe = false;
+
+			@Override
+			public void onMouseMove(float x, float y) {
+				super.onMouseMove(x, y);
+
+				if (x < 0 || y < 0 || x >= 1 || y > 1) {
+					if (wasMouseOnMe) infoText.setLocalizationKey(null);
+
+					wasMouseOnMe = false;
+				} else {
+					if (!wasMouseOnMe)
+						infoText.setLocalizationKey("levelEditor.infoText.cameraChange");
+
+					wasMouseOnMe = true;
+				}
+			}
+
+		};
+		cameraChange.getColor().set(0.25f, 0.25f, 0.25f, 1);
+		cameraChange.align(Align.right | Align.top).setScreenOffset(0, 0, 0, 0).setPixelOffset(4,
+				36 + 4 + 32, 32, 32);
+		group.addActor(cameraChange);
+
+		newLevel = new ImageButton(stage, p,
+				AssetRegistry.getAtlasRegion("ionium_ui-icons", "newFile")) {
+
+			@Override
+			public void onClickAction(float x, float y) {
+				super.onClickAction(x, y);
+
+				setWorld(new World(64, 64));
+			}
+
+			private boolean wasMouseOnMe = false;
+
+			@Override
+			public void onMouseMove(float x, float y) {
+				super.onMouseMove(x, y);
+
+				if (x < 0 || y < 0 || x >= 1 || y > 1) {
+					if (wasMouseOnMe) infoText.setLocalizationKey(null);
+
+					wasMouseOnMe = false;
+				} else {
+					if (!wasMouseOnMe) infoText.setLocalizationKey("levelEditor.infoText.newFile");
+
+					wasMouseOnMe = true;
+				}
+			}
+
+		};
+		newLevel.getColor().set(0.25f, 0.25f, 0.25f, 1);
+		newLevel.align(Align.left | Align.top).setScreenOffset(0, 0, 0, 0).setPixelOffset(4, 36, 32,
+				32);
+		group.addActor(newLevel);
+
+		openLevel = new ImageButton(stage, p,
+				AssetRegistry.getAtlasRegion("ionium_ui-icons", "openFile")) {
+
+			@Override
+			public void onClickAction(float x, float y) {
+				super.onClickAction(x, y);
+
+				Thread t = new Thread() {
+
+					@Override
+					public void run() {
+						JFileChooser fileChooser = new JFileChooser();
+						if (lastSaveLocation != null) {
+							fileChooser.setCurrentDirectory(lastSaveLocation);
+						} else {
+							fileChooser.setCurrentDirectory(
+									new File(System.getProperty("user.home"), "Desktop"));
+						}
+						fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+						fileChooser.setDialogTitle("Open a level file (usually .nbt)");
+						FileNameExtensionFilter ffef = new FileNameExtensionFilter(
+								"Named Binary Tag level files (.nbt)", "nbt");
+						fileChooser.addChoosableFileFilter(ffef);
+						fileChooser.setFileFilter(ffef);
+
+						int result = fileChooser.showOpenDialog(null);
+
+						if (result == JFileChooser.APPROVE_OPTION) {
+							final File selectedFile = fileChooser.getSelectedFile();
+
+							lastSaveLocation = selectedFile;
+
+							World w = null;
+
+							try {
+								w = WorldIO.bytesToWorld(
+										IOUtils.loadGzip(new FileHandle(selectedFile)));
+
+								saveLocationText.setLocalizationKey(Localization
+										.get("levelEditor.loadedFrom", lastSaveLocation.getPath()));
+							} catch (Exception e) {
+								e.printStackTrace();
+
+								saveLocationText.setLocalizationKey(Localization.get(
+										"levelEditor.failedToLoad", lastSaveLocation.getPath()));
+							}
+
+							if (w != null) setWorld(w);
+
+						}
+
+						System.gc();
+					}
+
+				};
+
+				t.setDaemon(true);
+				t.setName("Open Level");
+				t.start();
+			}
+
+			private boolean wasMouseOnMe = false;
+
+			@Override
+			public void onMouseMove(float x, float y) {
+				super.onMouseMove(x, y);
+
+				if (x < 0 || y < 0 || x >= 1 || y > 1) {
+					if (wasMouseOnMe) infoText.setLocalizationKey(null);
+
+					wasMouseOnMe = false;
+				} else {
+					if (!wasMouseOnMe) infoText.setLocalizationKey("levelEditor.infoText.openFile");
+
+					wasMouseOnMe = true;
+				}
+			}
+
+		};
+		openLevel.getColor().set(0.25f, 0.25f, 0.25f, 1);
+		openLevel.align(Align.left | Align.top).setScreenOffset(0, 0, 0, 0).setPixelOffset(4 + 36,
+				36, 32, 32);
+		group.addActor(openLevel);
+
+		saveLevel = new ImageButton(stage, p,
+				AssetRegistry.getAtlasRegion("ionium_ui-icons", "saveFile")) {
+
+			@Override
+			public void onClickAction(float x, float y) {
+				super.onClickAction(x, y);
+
+				if (world == null) return;
+
+				Thread t = new Thread() {
+
+					@Override
+					public void run() {
+						JFileChooser fileChooser = new JFileChooser();
+						if (lastSaveLocation != null) {
+							fileChooser.setCurrentDirectory(lastSaveLocation);
+						} else {
+							fileChooser.setCurrentDirectory(
+									new File(System.getProperty("user.home"), "Desktop"));
+						}
+						fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+						fileChooser.setSelectedFile(new File("a-custom-level.nbt"));
+						fileChooser.setDialogTitle("Select a directory to save in...");
+						int result = fileChooser.showSaveDialog(null);
+						if (result == JFileChooser.APPROVE_OPTION) {
+							final File selectedFile = fileChooser.getSelectedFile();
+
+							lastSaveLocation = selectedFile;
+
+							try {
+								IOUtils.saveGzip(new FileHandle(selectedFile),
+										WorldIO.worldToBytes(world));
+
+								saveLocationText.setLocalizationKey(Localization
+										.get("levelEditor.savedTo", lastSaveLocation.getPath()));
+								
+								sleep(5000);
+								
+								saveLocationText.setLocalizationKey(null);
+							} catch (Exception e) {
+								e.printStackTrace();
+
+								saveLocationText.setLocalizationKey(Localization
+										.get("levelEditor.failedToSave", selectedFile.getPath()));
+							}
+						}
+
+						System.gc();
+					}
+
+				};
+
+				t.setDaemon(true);
+				t.setName("Save Level");
+				t.start();
+			}
+
+			private boolean wasMouseOnMe = false;
+
+			@Override
+			public void onMouseMove(float x, float y) {
+				super.onMouseMove(x, y);
+
+				if (x < 0 || y < 0 || x >= 1 || y > 1) {
+					if (wasMouseOnMe) infoText.setLocalizationKey(null);
+
+					wasMouseOnMe = false;
+				} else {
+					if (!wasMouseOnMe) infoText.setLocalizationKey("levelEditor.infoText.saveFile");
+
+					wasMouseOnMe = true;
+				}
+			}
+
+		};
+		saveLevel.getColor().set(0.25f, 0.25f, 0.25f, 1);
+		saveLevel.align(Align.left | Align.top).setScreenOffset(0, 0, 0, 0)
+				.setPixelOffset(4 + 36 * 2, 36, 32, 32);
+		group.addActor(saveLevel).setEnabled(false);
 
 		stage.addActor(group);
 
