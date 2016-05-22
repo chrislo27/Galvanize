@@ -145,7 +145,7 @@ public class MainMenuScreen extends Updateable<Main> {
 			Group g = confirmNewGameGroup;
 
 			confirmYes = new ImageButton(stage, palette,
-					new TextureRegion(AssetRegistry.getTexture("ui_yes"))) {
+					AssetRegistry.getAtlasRegion("ionium_ui-icons", "yes")) {
 
 				@Override
 				public void onClickAction(float x, float y) {
@@ -173,7 +173,7 @@ public class MainMenuScreen extends Updateable<Main> {
 					.setScreenOffset(0, -0.1f).setPixelOffset(-96, 0);
 
 			confirmNo = new ImageButton(stage, palette,
-					new TextureRegion(AssetRegistry.getTexture("ui_no"))) {
+					AssetRegistry.getAtlasRegion("ionium_ui-icons", "no")) {
 
 				@Override
 				public void onClickAction(float x, float y) {
