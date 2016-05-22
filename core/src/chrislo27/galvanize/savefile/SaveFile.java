@@ -14,6 +14,8 @@ import com.evilco.mc.nbt.stream.NbtInputStream;
 import com.evilco.mc.nbt.stream.NbtOutputStream;
 import com.evilco.mc.nbt.tag.TagCompound;
 
+import ionium.util.IOUtils;
+
 public class SaveFile {
 
 	private static SaveFile instance;
@@ -67,21 +69,17 @@ public class SaveFile {
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		NbtOutputStream nbtStream = new NbtOutputStream(baos);
-		FileOutputStream outputStream = new FileOutputStream(handle.file().getAbsolutePath());
-		GZIPOutputStream gzipStream = new GZIPOutputStream(outputStream);
 
 		try {
 			nbtStream.write(writeToNBT());
-			gzipStream.write(baos.toByteArray());
+			IOUtils.saveGzip(handle, baos.toByteArray());
 		} catch (IOException e) {
 			nbtStream.close();
-			gzipStream.close();
 
 			throw e;
 		}
 
 		nbtStream.close();
-		gzipStream.close();
 	}
 
 	public void load(FileHandle handle) throws IOException {
@@ -89,7 +87,7 @@ public class SaveFile {
 
 		if (!handle.exists()) return;
 
-		ByteArrayInputStream byteStream = new ByteArrayInputStream(loadBytes(handle));
+		ByteArrayInputStream byteStream = new ByteArrayInputStream(IOUtils.loadGzip(handle));
 		NbtInputStream nbtStream = new NbtInputStream(byteStream);
 
 		try {
@@ -101,23 +99,6 @@ public class SaveFile {
 		}
 
 		nbtStream.close();
-	}
-
-	public static byte[] loadBytes(FileHandle file) throws IOException {
-		FileInputStream fis = new FileInputStream(file.file());
-		GZIPInputStream gzipstream = new GZIPInputStream(fis);
-
-		ByteArrayOutputStream byteStream = new ByteArrayOutputStream(2048);
-		byte[] buffer = new byte[2048];
-		int bytesRead;
-		while ((bytesRead = gzipstream.read(buffer)) > 0) {
-			byteStream.write(buffer, 0, bytesRead);
-		}
-
-		gzipstream.close();
-		fis.close();
-
-		return byteStream.toByteArray();
 	}
 
 	public boolean readFromNBT(TagCompound root) {
