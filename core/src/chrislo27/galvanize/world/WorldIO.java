@@ -10,6 +10,10 @@ import com.evilco.mc.nbt.stream.NbtInputStream;
 import com.evilco.mc.nbt.stream.NbtOutputStream;
 import com.evilco.mc.nbt.tag.TagCompound;
 import com.evilco.mc.nbt.tag.TagInteger;
+import com.evilco.mc.nbt.tag.TagIntegerArray;
+
+import chrislo27.galvanize.nbt.BlockIDMap;
+import chrislo27.galvanize.registry.Blocks;
 
 public class WorldIO {
 
@@ -22,8 +26,23 @@ public class WorldIO {
 		root.setTag(new TagInteger("Width", world.worldWidth));
 		root.setTag(new TagInteger("Height", world.worldHeight));
 
-		nbtStream.write(root);
+		BlockIDMap idMap = new BlockIDMap("BlockIDMap");
+		TagCompound idMapTag = idMap.getTag();
 
+		root.setTag(idMapTag);
+
+		int[] ids = new int[world.worldWidth * world.worldHeight];
+
+		for (int x = 0; x < world.worldWidth; x++) {
+			for (int y = 0; y < world.worldHeight; y++) {
+				ids[y * world.worldHeight + x] = idMap.keyToValue
+						.get(Blocks.getKey(world.getBlock(x, y)));
+			}
+		}
+
+		root.setTag(new TagIntegerArray("Blocks", ids));
+
+		nbtStream.write(root);
 		nbtStream.close();
 		return baos.toByteArray();
 	}
@@ -39,6 +58,19 @@ public class WorldIO {
 		int height = root.getInteger("Height");
 
 		World world = new World(width, height);
+
+		BlockIDMap idMap = new BlockIDMap("BlockIDMap");
+		idMap.loadFromTag(root.getCompound("BlockIDMap"));
+
+		int[] ids = root.getIntegerArray("Blocks");
+
+		for (int x = 0; x < world.worldWidth; x++) {
+			for (int y = 0; y < world.worldHeight; y++) {
+				world.setBlock(
+						Blocks.getBlock(idMap.valueToKey.get(ids[y * world.worldHeight + x])), x,
+						y);
+			}
+		}
 
 		nbtStream.close();
 		return world;
