@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
+import chrislo27.galvanize.Keybinds;
 import chrislo27.galvanize.Main;
 import chrislo27.galvanize.block.Block;
 import chrislo27.galvanize.registry.Blocks;
@@ -37,6 +38,7 @@ import ionium.stage.ui.skin.Palette;
 import ionium.stage.ui.skin.Palettes;
 import ionium.util.IOUtils;
 import ionium.util.i18n.Localization;
+import ionium.util.input.AnyKeyPressed;
 
 public class LevelEditorScreen extends Updateable<Main> {
 
@@ -44,6 +46,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 	WorldRenderer renderer;
 
 	final EditorInputProcessor editorInputProcessor = new EditorInputProcessor();
+	final float cameraMoveSpeed = 8;
 
 	Stage stage;
 	Group group;
@@ -57,10 +60,13 @@ public class LevelEditorScreen extends Updateable<Main> {
 	ImageButton newLevel;
 	ImageButton openLevel;
 	ImageButton saveLevel;
+	ImageButton currentBlockIcon;
+	TextLabel blockInfoText;
 
 	boolean isTesting = false;
 	boolean paused = false;
 	boolean isUsingPlayerCam = true;
+	Vector3 editorCam = new Vector3();
 
 	File lastSaveLocation = null;
 
@@ -159,6 +165,21 @@ public class LevelEditorScreen extends Updateable<Main> {
 				world.inputUpdate();
 			}
 		}
+
+		if (world != null && !isTesting) {
+			if (AnyKeyPressed.isAKeyPressed(Keybinds.UP)) {
+				renderer.camera.position.y += Gdx.graphics.getDeltaTime() * cameraMoveSpeed;
+			}
+			if (AnyKeyPressed.isAKeyPressed(Keybinds.DOWN)) {
+				renderer.camera.position.y -= Gdx.graphics.getDeltaTime() * cameraMoveSpeed;
+			}
+			if (AnyKeyPressed.isAKeyPressed(Keybinds.LEFT)) {
+				renderer.camera.position.x -= Gdx.graphics.getDeltaTime() * cameraMoveSpeed;
+			}
+			if (AnyKeyPressed.isAKeyPressed(Keybinds.RIGHT)) {
+				renderer.camera.position.x += Gdx.graphics.getDeltaTime() * cameraMoveSpeed;
+			}
+		}
 	}
 
 	@Override
@@ -180,7 +201,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 			public void render(SpriteBatch batch, float alpha) {
 				boolean isMouseOn = stage.isMouseOver(this);
 
-				if (isMouseOn) {
+				if (isMouseOn || world == null) {
 					if (otherAlpha < 1) {
 						otherAlpha = Math.min(1,
 								otherAlpha + Gdx.graphics.getDeltaTime() / alphaFadeSpeed);
@@ -232,6 +253,23 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 		group.addActor(infoText);
 
+		blockInfoText = new TextLabel(stage, Palettes.getIoniumDefault(main.font, main.font), null);
+		blockInfoText.setI10NStrategy(new LocalizationStrategy() {
+
+			@Override
+			public String get(String key, Object... params) {
+				if (key == null) return "";
+
+				return key;
+			}
+		});
+		blockInfoText.setTextAlign(Align.left | Align.top);
+		blockInfoText.getColor().set(0, 0, 0, 1);
+		blockInfoText.align(Align.left | Align.top).setScreenOffset(0, 0, 1, 0)
+				.setPixelOffset(4 + 36 * 3 + 4 + 64, 28, -8, 64);
+
+		group.addActor(blockInfoText);
+
 		saveLocationText = new TextLabel(stage, infoText.getPalette(), null);
 		saveLocationText.setI10NStrategy(new LocalizationStrategy() {
 
@@ -245,7 +283,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 		saveLocationText.setTextAlign(Align.left | Align.bottom);
 		saveLocationText.getColor().set(0, 0, 0, 1);
 		saveLocationText.align(Align.left | Align.bottom).setScreenOffset(0, 0, 1, 1)
-				.setPixelOffset(16, 48, -8, 0);
+				.setPixelOffset(16, 40, -8, 0);
 
 		group.addActor(saveLocationText);
 
@@ -409,6 +447,8 @@ public class LevelEditorScreen extends Updateable<Main> {
 			@Override
 			public void onClickAction(float x, float y) {
 				super.onClickAction(x, y);
+
+				isUsingPlayerCam = !isUsingPlayerCam;
 			}
 
 			private boolean wasMouseOnMe = false;
@@ -632,9 +672,36 @@ public class LevelEditorScreen extends Updateable<Main> {
 				.setPixelOffset(4 + 36 * 2, 36, 32, 32);
 		group.addActor(saveLevel).setEnabled(false);
 
+		currentBlockIcon = new ImageButton(stage, p, null) {
+
+			@Override
+			public void render(SpriteBatch batch, float alpha) {
+				Block b = Blocks.instance().getAllBlocks().get(selectedBlock);
+
+				int currentRegionId = b.getRenderBlock().getCurrentRegion(0, 0);
+				this.setTextureRegion(
+						Blocks.getRegion(b.getRenderBlock().getAllTextures().get(currentRegionId)));
+
+				super.render(batch, alpha);
+			}
+
+			@Override
+			public void onClickAction(float x, float y) {
+				super.onClickAction(x, y);
+
+				editorInputProcessor.changeBlock(1);
+			}
+
+		};
+		currentBlockIcon.align(Align.left | Align.top).setScreenOffset(0, 0, 0, 0)
+				.setPixelOffset(4 + 36 * 3, 36, 64, 64);
+		group.addActor(currentBlockIcon);
+
 		stage.addActor(group);
 
 		setTesting(false);
+		// force update block info text
+		editorInputProcessor.changeBlock(0);
 	}
 
 	@Override
@@ -774,6 +841,19 @@ public class LevelEditorScreen extends Updateable<Main> {
 			return true;
 		}
 
+		public void changeBlock(int amount) {
+			selectedBlock += amount;
+
+			if (selectedBlock < 0) selectedBlock = Blocks.instance().getAllBlocks().size - 1;
+			if (selectedBlock >= Blocks.instance().getAllBlocks().size) selectedBlock = 0;
+
+			String key = Blocks.instance().getAllKeys().get(selectedBlock);
+
+			blockInfoText.setLocalizationKey(Localization.get("block." + key + ".name") + " - "
+					+ Localization.get("levelEditor.infoText.changeBlockShortcut") + "\n[GRAY]"
+					+ Localization.get("block." + key + ".editorDesc"));
+		}
+
 		@Override
 		public boolean scrolled(int amount) {
 			boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)
@@ -792,10 +872,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 					renderer.camera.position.x += amount * moveAmt;
 				}
 			} else if (control && !shift) {
-				selectedBlock += amount;
-
-				if (selectedBlock < 0) selectedBlock = Blocks.instance().getAllBlocks().size - 1;
-				if (selectedBlock >= Blocks.instance().getAllBlocks().size) selectedBlock = 0;
+				changeBlock(amount);
 			} else if (!control && !shift) {
 
 				renderer.camera.zoom += amount * 0.25f;
