@@ -27,6 +27,7 @@ import chrislo27.galvanize.render.WorldRenderer;
 import chrislo27.galvanize.world.World;
 import chrislo27.galvanize.world.WorldIO;
 import ionium.registry.AssetRegistry;
+import ionium.registry.ScreenRegistry;
 import ionium.screen.Updateable;
 import ionium.stage.Actor;
 import ionium.stage.Group;
@@ -62,6 +63,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 	ImageButton saveLevel;
 	ImageButton currentBlockIcon;
 	TextLabel blockInfoText;
+	ImageButton backToMainMenu;
 
 	boolean isTesting = false;
 	boolean paused = false;
@@ -696,6 +698,40 @@ public class LevelEditorScreen extends Updateable<Main> {
 		currentBlockIcon.align(Align.left | Align.top).setScreenOffset(0, 0, 0, 0)
 				.setPixelOffset(4 + 36 * 3, 36, 64, 64);
 		group.addActor(currentBlockIcon);
+
+		backToMainMenu = new ImageButton(stage, p,
+				AssetRegistry.getAtlasRegion("ionium_ui-icons", "menu")) {
+
+			@Override
+			public void onClickAction(float x, float y) {
+				super.onClickAction(x, y);
+
+				main.setScreen(ScreenRegistry.get("mainMenu"));
+			}
+
+			private boolean wasMouseOnMe = false;
+
+			@Override
+			public void onMouseMove(float x, float y) {
+				super.onMouseMove(x, y);
+
+				if (x < 0 || y < 0 || x >= 1 || y > 1) {
+					if (wasMouseOnMe) infoText.setLocalizationKey(null);
+
+					wasMouseOnMe = false;
+				} else {
+					if (!wasMouseOnMe)
+						infoText.setLocalizationKey("levelEditor.infoText.backToMainMenu");
+
+					wasMouseOnMe = true;
+				}
+			}
+
+		};
+		backToMainMenu.getColor().set(0.25f, 0.25f, 0.25f, 1);
+		backToMainMenu.align(Align.left | Align.top).setScreenOffset(0, 0, 0, 0).setPixelOffset(4,
+				36 * 2, 32, 32);
+		group.addActor(backToMainMenu);
 
 		stage.addActor(group);
 
