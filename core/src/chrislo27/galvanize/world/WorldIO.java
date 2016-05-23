@@ -38,7 +38,7 @@ public class WorldIO {
 			for (int y = 0; y < world.worldHeight; y++) {
 				Block b = world.getBlock(x, y);
 
-				ids[y * world.worldHeight + x] = b == null ? -1
+				ids[y * world.worldHeight + x] = b == null ? 0
 						: idMap.keyToValue.get(Blocks.getKey(world.getBlock(x, y)));
 			}
 		}
@@ -71,7 +71,7 @@ public class WorldIO {
 			for (int y = 0; y < world.worldHeight; y++) {
 				int id = ids[y * world.worldHeight + x];
 
-				world.setBlock(id <= -1 ? null : Blocks.getBlock(idMap.valueToKey.get(id)), x, y);
+				world.setBlock(id <= 0 ? null : Blocks.getBlock(idMap.valueToKey.get(id)), x, y);
 			}
 		}
 
