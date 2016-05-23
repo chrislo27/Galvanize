@@ -31,6 +31,7 @@ public class MainMenuScreen extends Updateable<Main> {
 	private TextButton newGameButton;
 	private TextButton continueGameButton;
 	private TextButton levelEditorButton;
+	private ImageButton exitButton;
 
 	private Group confirmNewGameGroup;
 	private ImageButton confirmYes;
@@ -106,10 +107,8 @@ public class MainMenuScreen extends Updateable<Main> {
 				}
 			};
 
-			continueGameButton.align(Align.center | Align.bottom).setPixelOffsetSize(256, 48)
+			continueGameButton.align(Align.center | Align.bottom).setPixelOffset(0, 64, 256, 48)
 					.setScreenOffset(0, 0.25f);
-
-			continueGameButton.setPixelOffset(0, 64);
 
 			mainMenuGroup.addActor(continueGameButton);
 
@@ -127,12 +126,26 @@ public class MainMenuScreen extends Updateable<Main> {
 
 			};
 
-			levelEditorButton.align(Align.center | Align.bottom).setPixelOffsetSize(256, 48)
-					.setScreenOffset(0, 0.25f);
-
-			levelEditorButton.setPixelOffset(0, -64);
+			levelEditorButton.align(Align.center | Align.bottom)
+					.setPixelOffset(-32, -64, 256 - 64, 48).setScreenOffset(0, 0.25f);
 
 			mainMenuGroup.addActor(levelEditorButton);
+
+			exitButton = new ImageButton(stage, palette,
+					AssetRegistry.getAtlasRegion("ionium_ui-icons", "no")) {
+
+				@Override
+				public void onClickAction(float x, float y) {
+					Gdx.app.exit();
+				}
+
+			};
+
+			exitButton.getColor().set(0.25f, 0.25f, 0.25f, 1);
+			exitButton.align(Align.center | Align.bottom).setPixelOffset(128 - 24, -64, 48, 48)
+					.setScreenOffset(0, 0.25f);
+
+			mainMenuGroup.addActor(exitButton);
 		}
 
 		stage.addActor(mainMenuGroup);
