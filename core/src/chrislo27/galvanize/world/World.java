@@ -1,10 +1,12 @@
 package chrislo27.galvanize.world;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 
+import chrislo27.galvanize.Keybinds;
 import chrislo27.galvanize.block.Block;
 import chrislo27.galvanize.entity.Entity;
 import chrislo27.galvanize.entity.living.EntityPlayer;
@@ -14,6 +16,7 @@ import ionium.benchmarking.TickBenchmark;
 import ionium.registry.GlobalVariables;
 import ionium.util.CoordPool;
 import ionium.util.Coordinate;
+import ionium.util.input.AnyKeyPressed;
 import ionium.util.quadtree.QuadTree;
 
 public class World {
@@ -51,6 +54,21 @@ public class World {
 
 	public void inputUpdate() {
 		if (isPaused) return;
+
+		EntityPlayer player = getPlayer();
+
+		if (player == null) return;
+
+		if (AnyKeyPressed.isAKeyPressed(Keybinds.LEFT)) {
+			player.move(-Gdx.graphics.getDeltaTime(), 0);
+		}
+		if (AnyKeyPressed.isAKeyPressed(Keybinds.RIGHT)) {
+			player.move(Gdx.graphics.getDeltaTime(), 0);
+		}
+
+		if (AnyKeyPressed.isAKeyJustPressed(Keybinds.JUMP)) {
+			player.jump();
+		}
 	}
 
 	public void tickUpdate() {
