@@ -12,6 +12,7 @@ import com.evilco.mc.nbt.tag.TagCompound;
 import com.evilco.mc.nbt.tag.TagInteger;
 import com.evilco.mc.nbt.tag.TagIntegerArray;
 
+import chrislo27.galvanize.block.Block;
 import chrislo27.galvanize.nbt.BlockIDMap;
 import chrislo27.galvanize.registry.Blocks;
 
@@ -35,8 +36,10 @@ public class WorldIO {
 
 		for (int x = 0; x < world.worldWidth; x++) {
 			for (int y = 0; y < world.worldHeight; y++) {
-				ids[y * world.worldHeight + x] = idMap.keyToValue
-						.get(Blocks.getKey(world.getBlock(x, y)));
+				Block b = world.getBlock(x, y);
+
+				ids[y * world.worldHeight + x] = b == null ? -1
+						: idMap.keyToValue.get(Blocks.getKey(world.getBlock(x, y)));
 			}
 		}
 
@@ -66,9 +69,9 @@ public class WorldIO {
 
 		for (int x = 0; x < world.worldWidth; x++) {
 			for (int y = 0; y < world.worldHeight; y++) {
-				world.setBlock(
-						Blocks.getBlock(idMap.valueToKey.get(ids[y * world.worldHeight + x])), x,
-						y);
+				int id = ids[y * world.worldHeight + x];
+
+				world.setBlock(id <= -1 ? null : Blocks.getBlock(idMap.valueToKey.get(id)), x, y);
 			}
 		}
 

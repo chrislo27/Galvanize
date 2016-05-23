@@ -94,6 +94,15 @@ public class World {
 	}
 
 	public EntityPlayer getPlayer() {
+		if (thePlayer == null) {
+			for (Entity e : entities) {
+				if (e instanceof EntityPlayer) {
+					thePlayer = (EntityPlayer) e;
+					break;
+				}
+			}
+		}
+
 		return thePlayer;
 	}
 

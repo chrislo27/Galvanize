@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 
 import chrislo27.galvanize.block.Block;
 import chrislo27.galvanize.block.BlockGreyWall;
+import chrislo27.galvanize.block.BlockPlayerSpawner;
 import ionium.util.render.TextureRegionDebleeder;
 
 public class Blocks {
@@ -35,6 +36,7 @@ public class Blocks {
 
 	private void loadResources() {
 		addBlock("greyWall", new BlockGreyWall());
+		addBlock("playerSpawner", new BlockPlayerSpawner());
 	}
 
 	public void setAtlas(TextureAtlas a) {

@@ -6,15 +6,21 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.Input.Buttons;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 
 import chrislo27.galvanize.Main;
+import chrislo27.galvanize.block.Block;
 import chrislo27.galvanize.registry.Blocks;
 import chrislo27.galvanize.render.WorldRenderer;
 import chrislo27.galvanize.world.World;
@@ -37,6 +43,8 @@ public class LevelEditorScreen extends Updateable<Main> {
 	World world;
 	WorldRenderer renderer;
 
+	final EditorInputProcessor editorInputProcessor = new EditorInputProcessor();
+
 	Stage stage;
 	Group group;
 	ImageButton toggleTaskbar;
@@ -55,6 +63,8 @@ public class LevelEditorScreen extends Updateable<Main> {
 	boolean isUsingPlayerCam = true;
 
 	File lastSaveLocation = null;
+
+	int selectedBlock = 0;
 
 	public LevelEditorScreen(Main m) {
 		super(m);
@@ -110,6 +120,20 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 		if (world != null) {
 			renderer.render(main, main.camera.combined, main.batch, world);
+
+			main.batch.setProjectionMatrix(renderer.camera.combined);
+
+			main.batch.begin();
+
+			final float thickness = 2f / Block.TILE_SIZE;
+
+			main.batch.setColor(0, 1, 0, 1);
+			Main.drawRect(main.batch, -thickness, -thickness, world.worldWidth + thickness * 2,
+					world.worldHeight + thickness * 2, thickness);
+
+			main.batch.end();
+
+			main.batch.setProjectionMatrix(main.camera.combined);
 		} else {
 			main.batch.setProjectionMatrix(main.camera.combined);
 
@@ -130,7 +154,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 	@Override
 	public void renderUpdate() {
-		if (world != null) {
+		if (world != null && !paused) {
 			if (isTesting) {
 				world.inputUpdate();
 			}
@@ -563,9 +587,9 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 								saveLocationText.setLocalizationKey(Localization
 										.get("levelEditor.savedTo", lastSaveLocation.getPath()));
-								
+
 								sleep(5000);
-								
+
 								saveLocationText.setLocalizationKey(null);
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -619,6 +643,8 @@ public class LevelEditorScreen extends Updateable<Main> {
 			array.add("World is null!");
 			return;
 		}
+
+		array.add("zoom: " + renderer.camera.zoom);
 	}
 
 	@Override
@@ -635,7 +661,10 @@ public class LevelEditorScreen extends Updateable<Main> {
 		stage.onResize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		if (Gdx.input.getInputProcessor() instanceof InputMultiplexer) {
-			stage.addSelfToInputMultiplexer((InputMultiplexer) Gdx.input.getInputProcessor());
+			InputMultiplexer plex = (InputMultiplexer) Gdx.input.getInputProcessor();
+
+			stage.addSelfToInputMultiplexer(plex);
+			plex.addProcessor(editorInputProcessor);
 		}
 	}
 
@@ -646,8 +675,10 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 				@Override
 				public void run() {
-					stage.removeSelfFromInputMultiplexer(
-							(InputMultiplexer) Gdx.input.getInputProcessor());
+					InputMultiplexer plex = (InputMultiplexer) Gdx.input.getInputProcessor();
+
+					stage.removeSelfFromInputMultiplexer(plex);
+					plex.removeProcessor(editorInputProcessor);
 				}
 
 			});
@@ -665,6 +696,127 @@ public class LevelEditorScreen extends Updateable<Main> {
 	@Override
 	public void dispose() {
 		renderer.dispose();
+	}
+
+	private class EditorInputProcessor extends InputAdapter {
+
+		private final Vector3 tmp = new Vector3();
+		private int button = -1;
+		private final Vector2 dragCoord = new Vector2();
+		private final Vector2 lastCam = new Vector2();
+
+		private void setBlock(Block block, int screenX, int screenY) {
+			if (world == null) return;
+
+			tmp.set(screenX, screenY, 0);
+			renderer.camera.unproject(tmp);
+
+			int bx = (int) tmp.x;
+			int by = (int) tmp.y;
+
+			world.setBlock(block, bx, by);
+		}
+
+		private void setBlockFromButton(int screenX, int screenY, int button) {
+			Block block = null;
+			boolean canSet = true;
+
+			if (button == Buttons.LEFT) {
+				block = Blocks.instance().getAllBlocks().get(selectedBlock);
+			} else if (button == Buttons.RIGHT) {
+				block = null;
+			} else {
+				canSet = false;
+			}
+
+			if (canSet) setBlock(block, screenX, screenY);
+		}
+
+		@Override
+		public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+			if (pointer == 0) this.button = button;
+
+			setBlockFromButton(screenX, screenY, this.button);
+
+			if (button == Buttons.MIDDLE) {
+				dragCoord.set(screenX, screenY);
+				lastCam.set(renderer.camera.position.x, renderer.camera.position.y);
+			}
+
+			return true;
+		}
+
+		@Override
+		public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+			if (pointer == 0) {
+				if (this.button == button) {
+					this.button = -1;
+				}
+			}
+
+			return true;
+		}
+
+		@Override
+		public boolean touchDragged(int screenX, int screenY, int pointer) {
+			if (Gdx.input.isButtonPressed(Buttons.MIDDLE)) {
+				float deltaX = dragCoord.x - screenX;
+				float deltaY = dragCoord.y - screenY;
+
+				tmp.set(deltaX / Block.TILE_SIZE * renderer.camera.zoom,
+						deltaY / Block.TILE_SIZE * renderer.camera.zoom, 0);
+
+				renderer.camera.position.set(lastCam.x + tmp.x, lastCam.y - tmp.y, 0);
+			} else {
+				setBlockFromButton(screenX, screenY, button);
+			}
+
+			return true;
+		}
+
+		@Override
+		public boolean scrolled(int amount) {
+			boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)
+					|| Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
+			boolean control = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)
+					|| Gdx.input.isKeyPressed(Keys.CONTROL_RIGHT);
+
+			if (shift) {
+				final float moveAmt = 2;
+
+				if (control) {
+					// vertical
+					renderer.camera.position.y += amount * moveAmt * -1;
+				} else {
+					// horizontal
+					renderer.camera.position.x += amount * moveAmt;
+				}
+			} else if (control && !shift) {
+				selectedBlock += amount;
+
+				if (selectedBlock < 0) selectedBlock = Blocks.instance().getAllBlocks().size - 1;
+				if (selectedBlock >= Blocks.instance().getAllBlocks().size) selectedBlock = 0;
+			} else if (!control && !shift) {
+
+				renderer.camera.zoom += amount * 0.25f;
+
+				final float smallerViewport = renderer.camera.viewportWidth <= renderer.camera.viewportHeight
+						? renderer.camera.viewportWidth : renderer.camera.viewportHeight;
+				final float gutter = world.worldWidth <= world.worldHeight ? world.worldWidth * 0.5f
+						: world.worldHeight * 0.5f;
+
+				float maxZoom = world.worldWidth >= world.worldHeight
+						? (world.worldWidth + gutter) / smallerViewport
+						: (world.worldHeight + gutter) / smallerViewport;
+
+				renderer.camera.zoom = MathUtils.clamp(renderer.camera.zoom, 0.01f, maxZoom);
+
+				renderer.camera.update();
+			}
+
+			return true;
+		}
+
 	}
 
 }

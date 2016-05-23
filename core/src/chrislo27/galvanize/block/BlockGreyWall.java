@@ -16,7 +16,7 @@ public class BlockGreyWall extends Block {
 	public void getRequiredTextures(ObjectMap<String, Texture> map) {
 		map.put("greywall_junction", new Texture("images/blocks/greywall/junction.png"));
 		map.put("greywall_filled", new Texture("images/blocks/greywall/filled.png"));
-		map.put("greywall_horiztonal", new Texture("images/blocks/greywall/horizontal.png"));
+		map.put("greywall_horizontal", new Texture("images/blocks/greywall/horizontal.png"));
 		map.put("greywall_vertical", new Texture("images/blocks/greywall/vertical.png"));
 	}
 
