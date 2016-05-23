@@ -7,6 +7,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import chrislo27.galvanize.block.Block;
+import chrislo27.galvanize.registry.Blocks;
 import chrislo27.galvanize.world.World;
 import ionium.util.MathHelper;
 
@@ -40,18 +41,22 @@ public abstract class BlockRenderer {
 		this(animationTime, true, textures);
 	}
 
-	protected void drawRegion(Batch batch, AtlasRegion region, int x, int y) {
+	public void drawRegion(Batch batch, AtlasRegion region, int x, int y) {
 		batch.draw(region, x, y, fitInBlockSize ? 1 : region.getRegionWidth() / Block.TILE_SIZE,
 				fitInBlockSize ? 1 : region.getRegionHeight() / Block.TILE_SIZE);
 	}
 
-	protected int getCurrentRegion(int x, int y) {
+	public int getCurrentRegion(int x, int y) {
 		if (textures.size == 1) return 0;
 
 		float percent = MathHelper.getSawtoothWave((long) (System.currentTimeMillis()
 				+ (timeOffset.x * y * 1000) + (timeOffset.y * y * 1000)), animationTime);
 
 		return MathUtils.clamp((int) (percent * textures.size), 0, textures.size - 1);
+	}
+
+	public Array<String> getAllTextures() {
+		return textures;
 	}
 
 	public abstract void render(Batch batch, World world, int x, int y);

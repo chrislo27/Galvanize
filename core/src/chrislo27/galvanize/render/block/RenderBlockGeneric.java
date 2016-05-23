@@ -28,6 +28,7 @@ public class RenderBlockGeneric extends BlockRenderer {
 	public RenderBlockGeneric(float animationTime, String... textures) {
 		this(animationTime, true, textures);
 	}
+	
 
 	@Override
 	public void render(Batch batch, World world, int x, int y) {
