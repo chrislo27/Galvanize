@@ -22,7 +22,7 @@ public class World {
 	private QuadTree<Entity> quadtree;
 	private Array<Entity> entityRetrievalArray = new Array<>();
 	public CollisionResolver collisionResolver;
-	public Vector2 gravity = new Vector2(0, 25);
+	public Vector2 gravity = new Vector2(0, -25);
 	public Pool<PhysicsBody> physicsBodyPool = new Pool<PhysicsBody>() {
 
 		@Override

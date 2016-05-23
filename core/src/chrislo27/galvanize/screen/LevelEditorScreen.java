@@ -6,10 +6,10 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Input.Buttons;
 import com.badlogic.gdx.Input.Keys;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -57,7 +57,6 @@ public class LevelEditorScreen extends Updateable<Main> {
 	ImageButton stopButton;
 	TextLabel infoText;
 	TextLabel saveLocationText;
-	ImageButton cameraChange;
 	ImageButton newLevel;
 	ImageButton openLevel;
 	ImageButton saveLevel;
@@ -67,8 +66,9 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 	boolean isTesting = false;
 	boolean paused = false;
-	boolean isUsingPlayerCam = true;
+	boolean isUsingEditorCam = true;
 	Vector3 editorCam = new Vector3();
+	Vector3 mousePosIndicator = new Vector3();
 
 	File lastSaveLocation = null;
 
@@ -78,6 +78,25 @@ public class LevelEditorScreen extends Updateable<Main> {
 		super(m);
 
 		renderer = new WorldRenderer();
+		setUsingEditorCam(false);
+		setUsingEditorCam(true);
+	}
+
+	public void setUsingEditorCam(boolean b) {
+		isUsingEditorCam = b;
+
+		if (!isUsingEditorCam) {
+			editorCam.set(renderer.camera.position.x, renderer.camera.position.y,
+					renderer.camera.zoom);
+
+			renderer.camera.zoom = 1;
+		} else {
+			renderer.camera.position.x = editorCam.x;
+			renderer.camera.position.y = editorCam.y;
+			renderer.camera.zoom = editorCam.z;
+
+			renderer.camera.update();
+		}
 	}
 
 	public void setWorld(World world) {
@@ -93,15 +112,15 @@ public class LevelEditorScreen extends Updateable<Main> {
 		isTesting = test;
 		setPaused(false);
 
+		setUsingEditorCam(!isTesting);
+
 		if (isTesting) {
 			stopButton.setEnabled(true);
-			cameraChange.setEnabled(true);
 		} else {
 			if (world != null) world.clearAllEntities();
 			stopButton.setEnabled(false);
 			pauseButton.setEnabled(false);
 			playButton.setEnabled(true);
-			cameraChange.setEnabled(false);
 		}
 	}
 
@@ -139,6 +158,11 @@ public class LevelEditorScreen extends Updateable<Main> {
 			Main.drawRect(main.batch, -thickness, -thickness, world.worldWidth + thickness * 2,
 					world.worldHeight + thickness * 2, thickness);
 
+			if (!isTesting) {
+				Main.drawRect(main.batch, mousePosIndicator.x, mousePosIndicator.y, 1, 1,
+						thickness);
+			}
+
 			main.batch.end();
 
 			main.batch.setProjectionMatrix(main.camera.combined);
@@ -162,6 +186,11 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 	@Override
 	public void renderUpdate() {
+		mousePosIndicator.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+		renderer.camera.unproject(mousePosIndicator);
+		mousePosIndicator.x = (int) mousePosIndicator.x;
+		mousePosIndicator.y = (int) mousePosIndicator.y;
+
 		if (world != null && !paused) {
 			if (isTesting) {
 				world.inputUpdate();
@@ -356,6 +385,8 @@ public class LevelEditorScreen extends Updateable<Main> {
 			@Override
 			public void onClickAction(float x, float y) {
 				super.onClickAction(x, y);
+
+				setTesting(true);
 			}
 
 			private boolean wasMouseOnMe = false;
@@ -387,6 +418,10 @@ public class LevelEditorScreen extends Updateable<Main> {
 			@Override
 			public void onClickAction(float x, float y) {
 				super.onClickAction(x, y);
+
+				if (isTesting) {
+					setPaused(true);
+				}
 			}
 
 			private boolean wasMouseOnMe = false;
@@ -418,6 +453,8 @@ public class LevelEditorScreen extends Updateable<Main> {
 			@Override
 			public void onClickAction(float x, float y) {
 				super.onClickAction(x, y);
+
+				setTesting(false);
 			}
 
 			private boolean wasMouseOnMe = false;
@@ -442,40 +479,6 @@ public class LevelEditorScreen extends Updateable<Main> {
 		stopButton.align(Align.right | Align.top).setScreenOffset(0, 0, 0, 0).setPixelOffset(4, 36,
 				32, 32);
 		group.addActor(stopButton);
-
-		cameraChange = new ImageButton(stage, p,
-				AssetRegistry.getAtlasRegion("ionium_ui-icons", "moviecamera")) {
-
-			@Override
-			public void onClickAction(float x, float y) {
-				super.onClickAction(x, y);
-
-				isUsingPlayerCam = !isUsingPlayerCam;
-			}
-
-			private boolean wasMouseOnMe = false;
-
-			@Override
-			public void onMouseMove(float x, float y) {
-				super.onMouseMove(x, y);
-
-				if (x < 0 || y < 0 || x >= 1 || y > 1) {
-					if (wasMouseOnMe) infoText.setLocalizationKey(null);
-
-					wasMouseOnMe = false;
-				} else {
-					if (!wasMouseOnMe)
-						infoText.setLocalizationKey("levelEditor.infoText.cameraChange");
-
-					wasMouseOnMe = true;
-				}
-			}
-
-		};
-		cameraChange.getColor().set(0.25f, 0.25f, 0.25f, 1);
-		cameraChange.align(Align.right | Align.top).setScreenOffset(0, 0, 0, 0).setPixelOffset(4,
-				36 + 4 + 32, 32, 32);
-		group.addActor(cameraChange);
 
 		newLevel = new ImageButton(stage, p,
 				AssetRegistry.getAtlasRegion("ionium_ui-icons", "newFile")) {
@@ -621,7 +624,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 								"Galvanize binary files (.gdat)", "gdat");
 						fileChooser.addChoosableFileFilter(ffef);
 						fileChooser.setFileFilter(ffef);
-						
+
 						int result = fileChooser.showSaveDialog(null);
 						if (result == JFileChooser.APPROVE_OPTION) {
 							final File selectedFile = fileChooser.getSelectedFile();
@@ -842,6 +845,8 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 		@Override
 		public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+			if (isTesting) return false;
+
 			if (pointer == 0) this.button = button;
 
 			setBlockFromButton(screenX, screenY, this.button);
@@ -856,6 +861,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 		@Override
 		public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+			if (isTesting) return false;
 			if (pointer == 0) {
 				if (this.button == button) {
 					this.button = -1;
@@ -867,6 +873,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 		@Override
 		public boolean touchDragged(int screenX, int screenY, int pointer) {
+			if (isTesting) return false;
 			if (Gdx.input.isButtonPressed(Buttons.MIDDLE)) {
 				float deltaX = dragCoord.x - screenX;
 				float deltaY = dragCoord.y - screenY;
@@ -897,6 +904,7 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 		@Override
 		public boolean scrolled(int amount) {
+			if (isTesting) return false;
 			boolean shift = Gdx.input.isKeyPressed(Keys.SHIFT_LEFT)
 					|| Gdx.input.isKeyPressed(Keys.SHIFT_RIGHT);
 			boolean control = Gdx.input.isKeyPressed(Keys.CONTROL_LEFT)
@@ -913,9 +921,6 @@ public class LevelEditorScreen extends Updateable<Main> {
 					renderer.camera.position.x += amount * moveAmt;
 				}
 			} else if (control && !shift) {
-				changeBlock(amount);
-			} else if (!control && !shift) {
-
 				renderer.camera.zoom += amount * 0.25f;
 
 				final float smallerViewport = renderer.camera.viewportWidth <= renderer.camera.viewportHeight
@@ -930,6 +935,8 @@ public class LevelEditorScreen extends Updateable<Main> {
 				renderer.camera.zoom = MathUtils.clamp(renderer.camera.zoom, 0.01f, maxZoom);
 
 				renderer.camera.update();
+			} else if (!control && !shift) {
+				changeBlock(amount);
 			}
 
 			return true;
