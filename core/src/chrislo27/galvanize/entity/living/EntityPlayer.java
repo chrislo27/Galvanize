@@ -10,7 +10,7 @@ public class EntityPlayer extends EntityLiving {
 		super(world, x, y, 1, 1);
 
 		this.renderer = new RenderPlayer(this);
-		this.maxSpeed.set(10, 10);
+		this.maxSpeed.set(7.5f, 7.5f);
 		this.accSpeed.set(maxSpeed.x * 5, maxSpeed.y * 5);
 		this.jumpHeight = MathHelper.getJumpVelo(Math.abs(world.gravity.y),
 				2f + physicsBody.bounds.height);
