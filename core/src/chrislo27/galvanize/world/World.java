@@ -31,6 +31,7 @@ public class World {
 		}
 
 	};
+	private boolean isPaused = false;
 
 	public final int worldWidth, worldHeight;
 
@@ -49,10 +50,12 @@ public class World {
 	}
 
 	public void inputUpdate() {
-
+		if (isPaused) return;
 	}
 
 	public void tickUpdate() {
+		if (isPaused) return;
+
 		TickBenchmark.instance().start("blockUpdate");
 		for (int x = 0; x < worldWidth; x++) {
 			for (int y = 0; y < worldHeight; y++) {
@@ -91,6 +94,14 @@ public class World {
 			}
 		}
 		TickBenchmark.instance().stop("entityUpdate");
+	}
+
+	public boolean isPaused() {
+		return isPaused;
+	}
+
+	public void setPaused(boolean p) {
+		isPaused = p;
 	}
 
 	public EntityPlayer getPlayer() {

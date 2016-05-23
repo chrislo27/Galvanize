@@ -32,14 +32,11 @@ public abstract class EntityRenderer<T extends Entity> {
 	}
 
 	public void updateLerpPosition() {
+		if (entity.world.isPaused()) return;
+
 		lerpPosition.set(entity.lastKnownPosition);
 		lerpPosition.lerp(tmpVector.set(entity.physicsBody.bounds.x, entity.physicsBody.bounds.y),
 				Main.tickDeltaTime / tickRate);
-
-		if (DebugSetting.debug && Gdx.input.isKeyPressed(Keys.P)) {
-			Main.logger.debug(entity.lastKnownPosition + " to " + tmpVector + " with "
-					+ (Main.tickDeltaTime / tickRate) + " = " + lerpPosition);
-		}
 	}
 
 	public abstract void render(Batch batch, World world);
