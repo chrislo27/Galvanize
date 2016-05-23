@@ -7,7 +7,7 @@ import ionium.util.MathHelper;
 public class EntityPlayer extends EntityLiving {
 
 	public EntityPlayer(World world, float x, float y) {
-		super(world, x, y, 2, 2);
+		super(world, x, y, 1, 1);
 
 		this.renderer = new RenderPlayer(this);
 		this.maxSpeed.set(10, 10);
