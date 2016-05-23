@@ -1,22 +1,25 @@
 package chrislo27.galvanize.render.entity;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.math.MathUtils;
 
+import chrislo27.galvanize.block.Block;
 import chrislo27.galvanize.entity.living.EntityPlayer;
 import chrislo27.galvanize.world.World;
 import ionium.registry.AssetRegistry;
+import ionium.templates.Main;
 
 public class RenderPlayer extends EntityRenderer<EntityPlayer> {
 
 	private static final String atlasKey = "entity_player";
 	private static final int ROUNDED_RECT_PADDING = 8;
-	private static final float TOP_SPACE = (15 - ROUNDED_RECT_PADDING) * (1f / 32f);
-	private static final float MIDDLE_SPACE = (18 - ROUNDED_RECT_PADDING) * (1f / 32f);
-	private static final float BOTTOM_SPACE = (24 - ROUNDED_RECT_PADDING) * (1f / 32f);
-	private static final float MAX_Y_SPACING = (5) * (1f / 32f);
+	private static final float TOP_SPACE = (15 - ROUNDED_RECT_PADDING) * (1f / 64f);
+	private static final float MIDDLE_SPACE = (18 - ROUNDED_RECT_PADDING) * (1f / 64f);
+	private static final float BOTTOM_SPACE = (24 - ROUNDED_RECT_PADDING) * (1f / 64f);
+	private static final float MAX_Y_SPACING = (5) * (1f / Block.TILE_SIZE);
 	private static final float STRETCH_MULTIPLIER = 1.5f;
 
 	private boolean facingLeft = false;
