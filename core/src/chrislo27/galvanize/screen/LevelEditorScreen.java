@@ -129,13 +129,9 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 		if (world != null) world.setPaused(paused);
 
-		if (paused) {
-			pauseButton.setEnabled(false);
-			playButton.setEnabled(true);
-		} else {
-			pauseButton.setEnabled(true);
-			playButton.setEnabled(false);
-		}
+		pauseButton.setEnabled(!paused);
+		playButton.setEnabled(paused);
+
 	}
 
 	public boolean canTest() {
