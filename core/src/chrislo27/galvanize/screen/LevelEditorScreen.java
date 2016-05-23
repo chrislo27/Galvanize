@@ -529,9 +529,9 @@ public class LevelEditorScreen extends Updateable<Main> {
 									new File(System.getProperty("user.home"), "Desktop"));
 						}
 						fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-						fileChooser.setDialogTitle("Open a level file (usually .nbt)");
+						fileChooser.setDialogTitle("Open a level file");
 						FileNameExtensionFilter ffef = new FileNameExtensionFilter(
-								"Named Binary Tag level files (.nbt)", "nbt");
+								"Galvanize binary files (.gdat)", "gdat");
 						fileChooser.addChoosableFileFilter(ffef);
 						fileChooser.setFileFilter(ffef);
 
@@ -615,8 +615,13 @@ public class LevelEditorScreen extends Updateable<Main> {
 									new File(System.getProperty("user.home"), "Desktop"));
 						}
 						fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-						fileChooser.setSelectedFile(new File("a-custom-level.nbt"));
+						fileChooser.setSelectedFile(new File("a-custom-level.gdat"));
 						fileChooser.setDialogTitle("Select a directory to save in...");
+						FileNameExtensionFilter ffef = new FileNameExtensionFilter(
+								"Galvanize binary files (.gdat)", "gdat");
+						fileChooser.addChoosableFileFilter(ffef);
+						fileChooser.setFileFilter(ffef);
+						
 						int result = fileChooser.showSaveDialog(null);
 						if (result == JFileChooser.APPROVE_OPTION) {
 							final File selectedFile = fileChooser.getSelectedFile();

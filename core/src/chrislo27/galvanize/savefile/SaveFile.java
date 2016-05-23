@@ -34,7 +34,7 @@ public class SaveFile {
 	public FileHandle saveLocation;
 
 	private void loadResources() {
-		saveLocation = Gdx.files.local("saves/save.nbt");
+		saveLocation = Gdx.files.local("saves/save.gdat");
 	}
 
 	public void reset() {
