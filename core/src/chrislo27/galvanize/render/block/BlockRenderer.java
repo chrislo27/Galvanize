@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Array;
 import chrislo27.galvanize.block.Block;
 import chrislo27.galvanize.registry.Blocks;
 import chrislo27.galvanize.world.World;
+import ionium.templates.Main;
 import ionium.util.MathHelper;
 
 public abstract class BlockRenderer {
@@ -49,8 +50,9 @@ public abstract class BlockRenderer {
 	public int getCurrentRegion(int x, int y) {
 		if (textures.size == 1) return 0;
 
-		float percent = MathHelper.getSawtoothWave((long) (System.currentTimeMillis()
-				+ (timeOffset.x * y * 1000) + (timeOffset.y * y * 1000)), animationTime);
+		float offset = (timeOffset.x * y * 1000) + (timeOffset.y * y * 1000);
+		float percent = MathHelper.getSawtoothWave(System.currentTimeMillis() + ((long) offset),
+				animationTime);
 
 		return MathUtils.clamp((int) (percent * textures.size), 0, textures.size - 1);
 	}
