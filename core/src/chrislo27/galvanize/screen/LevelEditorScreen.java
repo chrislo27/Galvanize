@@ -700,6 +700,24 @@ public class LevelEditorScreen extends Updateable<Main> {
 				editorInputProcessor.changeBlock(1);
 			}
 
+			private boolean wasMouseOnMe = false;
+
+			@Override
+			public void onMouseMove(float x, float y) {
+				super.onMouseMove(x, y);
+
+				if (x < 0 || y < 0 || x >= 1 || y > 1) {
+					if (wasMouseOnMe) infoText.setLocalizationKey(null);
+
+					wasMouseOnMe = false;
+				} else {
+					if (!wasMouseOnMe)
+						infoText.setLocalizationKey("levelEditor.infoText.changeBlockShortcut");
+
+					wasMouseOnMe = true;
+				}
+			}
+
 		};
 		currentBlockIcon.align(Align.left | Align.top).setScreenOffset(0, 0, 0, 0)
 				.setPixelOffset(4 + 36 * 3, 36, 64, 64);
@@ -895,9 +913,8 @@ public class LevelEditorScreen extends Updateable<Main> {
 
 			String key = Blocks.instance().getAllKeys().get(selectedBlock);
 
-			blockInfoText.setLocalizationKey(Localization.get("block." + key + ".name") + " - "
-					+ Localization.get("levelEditor.infoText.changeBlockShortcut") + "\n[GRAY]"
-					+ Localization.get("block." + key + ".editorDesc"));
+			blockInfoText.setLocalizationKey(
+					Localization.get("block." + key + ".name") + "\n[#616161]" + key + "[]");
 		}
 
 		@Override
