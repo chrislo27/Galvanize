@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.ObjectMap;
 import chrislo27.galvanize.block.Block;
 import chrislo27.galvanize.block.BlockGreyWall;
 import chrislo27.galvanize.block.BlockPlayerSpawner;
+import ionium.util.BiObjectMap;
 import ionium.util.render.TextureRegionDebleeder;
 
 public class Blocks {
@@ -25,11 +26,7 @@ public class Blocks {
 		return instance;
 	}
 
-	private ObjectMap<String, Block> blocks = new ObjectMap<>();
-	private ObjectMap<Block, String> reverseMap = new ObjectMap<>();
-
-	private Array<Block> allBlocks = new Array<>();
-	private Array<String> allKeys = new Array<>();
+	private BiObjectMap<String, Block> map = new BiObjectMap<>();
 
 	private TextureAtlas atlas;
 	private ObjectMap<String, AtlasRegion> regions = new ObjectMap<>();
@@ -64,28 +61,25 @@ public class Blocks {
 	public static Block getBlock(String key) {
 		if (key == null) return null;
 
-		return instance().blocks.get(key);
+		return instance().map.getValue(key);
 	}
 
 	public static String getKey(Block block) {
 		if (block == null) return null;
 
-		return instance().reverseMap.get(block);
+		return instance().map.getKey(block);
 	}
 
 	public Array<Block> getAllBlocks() {
-		return allBlocks;
+		return map.getAllValues();
 	}
 
 	public Array<String> getAllKeys() {
-		return allKeys;
+		return map.getAllKeys();
 	}
 
 	public static void addBlock(String key, Block block) {
-		instance().blocks.put(key, block);
-		instance().reverseMap.put(block, key);
-		instance().allBlocks.add(block);
-		instance().allKeys.add(key);
+		instance().map.put(key, block);
 	}
 
 }
